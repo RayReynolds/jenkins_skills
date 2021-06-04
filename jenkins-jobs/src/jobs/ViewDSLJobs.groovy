@@ -1,6 +1,6 @@
 listView('Part II - DSL') {
     jobs {
-        regex '.+\(DSL\).*'
+        regex '.+\\(DSL\\).*'
     }
 
     columns {
