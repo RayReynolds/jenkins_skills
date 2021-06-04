@@ -18,7 +18,7 @@ mavenJob('Jenkins Tutorial Demo - Library 1 (DSL)') {
         git {
             remote {
                 url 'git@gitlab.com:RayReynolds/jenkins-tutorial-demo.git'
-                credentials('RayReynolds')
+                credentials('RayReynoldsGitlab')
             }
 
             branch '$Branch'
