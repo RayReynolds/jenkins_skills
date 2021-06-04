@@ -1,4 +1,4 @@
-mavenJob('Jenkins Tutorial Demo - Application 1 (DSL)') {
+mavenJob('Jenkins Tutorial Demo - Library 1 - Release (DSL)') {
     description 'Build job for Jenkins Application / Library 1'
 
     logRotator {
@@ -79,6 +79,68 @@ mavenJob('Jenkins Tutorial Demo - Application 1 (DSL)') {
       build.replaceAction(new ParametersAction(param1, param2))
     }
     '''.stripIndent()
+
+        maven {
+            mavenInstallation 'Latest'
+            goals 'versions:set ' +
+                    '-DnewVersion=${releaseVersion} ' +
+                    '-DgenerateBackupPoms=false'
+            rootPOM "library1/pom.xml"
+        }
+
+        maven {
+            mavenInstallation 'Latest'
+            goals 'versions:use-releases ' +
+                    '-DgenerateBackupPoms=false ' +
+                    '-DprocessDependencyManagement=true'
+            rootPOM "library1/pom.xml"
+        }
+
+        shell '''
+      if find library1/ -name 'pom.xml' | xargs grep -n "SNAPSHOT"; then
+        echo 'SNAPSHOT versions not allowed in a release'
+        exit 1
+      fi
+      '''.stripIndent()
+    }
+
+    postBuildSteps {
+        maven {
+            mavenInstallation 'Latest'
+            goals 'scm:checkin ' +
+                    '-Dmessage="Release version ' +
+                    '${project.artifactId}:${releaseVersion}" ' +
+                    '-DdeveloperConnectionUrl=scm:git:' +
+                    'git@gitlab.com:SvenWoltmann/jenkins-tutorial-demo.git'
+            rootPOM "library1/pom.xml"
+        }
+
+        maven {
+            mavenInstallation 'Latest'
+            goals 'scm:tag ' +
+                    '-Dtag=${project.artifactId}-${releaseVersion} ' +
+                    '-DdeveloperConnectionUrl=scm:git:' +
+                    'git@gitlab.com:SvenWoltmann/jenkins-tutorial-demo.git'
+            rootPOM "library1/pom.xml"
+        }
+
+        maven {
+            mavenInstallation 'Latest'
+            goals 'versions:set ' +
+                    '-DnewVersion=${nextSnapshotVersion} ' +
+                    '-DgenerateBackupPoms=false'
+            rootPOM "library1/pom.xml"
+        }
+
+        maven {
+            mavenInstallation 'Latest'
+            goals 'scm:checkin ' +
+                    '-Dmessage="Switch to next snapshot version: ' +
+                    '${project.artifactId}:${nextSnapshotVersion}" ' +
+                    '-DdeveloperConnectionUrl=scm:git:' +
+                    'git@gitlab.com:SvenWoltmann/jenkins-tutorial-demo.git'
+            rootPOM "library1/pom.xml"
+        }
     }
 
     triggers {
