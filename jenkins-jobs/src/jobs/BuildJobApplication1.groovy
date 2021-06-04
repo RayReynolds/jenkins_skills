@@ -5,15 +5,6 @@ mavenJob('Jenkins Tutorial Demo - Application 1 (DSL)') {
         numToKeep 5
     }
 
-    parameters {
-        stringParam('Branch', 'origin/master')
-        //gitParam('Branch') {
-        //    description 'The Git branch to checkout'
-        //    type 'BRANCH'
-        //    defaultValue 'origin/master'
-        //}
-    }
-
     scm {
         git {
             remote {
@@ -21,7 +12,7 @@ mavenJob('Jenkins Tutorial Demo - Application 1 (DSL)') {
                 credentials('RayReynoldsGitlab')
             }
 
-            branch '$Branch'
+            branch 'origin/master'
 
             // Add extensions 'SparseCheckoutPaths' and 'PathRestriction'
             def nodeBuilder = NodeBuilder.newInstance()
