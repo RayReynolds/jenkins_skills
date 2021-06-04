@@ -133,4 +133,3 @@ mavenJob('Jenkins Tutorial Demo - Library 1 - Release (DSL)') {
             rootPOM "library1/pom.xml"
         }
     }
-}
