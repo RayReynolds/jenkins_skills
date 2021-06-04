@@ -40,97 +40,80 @@ mavenJob('Jenkins Tutorial Demo - Application 1 - Release (DSL)') {
             }
 
             extensions {
-                localBranch 'master'
+                localBranch ('master')
             }
         }
     }
 
     preBuildSteps {
-        systemGroovyCommand '''\
-                import hudson.model.StringParameterValue
-                import hudson.model.ParametersAction
-                
-                def env = build.getEnvironment(listener)
-                String releaseVersion = env.get('releaseVersion')
-                String nextSnapshotVersion = env.get('nextSnapshotVersion')
-                
-                if (!releaseVersion) {
-                    String pomPath = build.workspace.toString() + '/library1/pom.xml'
-                    def pom = new XmlSlurper().parse(new File(pomPath))
-                    releaseVersion = pom.version.toString().replace('-SNAPSHOT', '')
-                    println "releaseVersion (calculated) = $releaseVersion"
-                    def param = new StringParameterValue('releaseVersion', releaseVersion)
-                    build.replaceAction(new ParametersAction(param))
-                }
-                
-                if (!nextSnapshotVersion) {
-                    def tokens = releaseVersion.split('\\\\.')
-                    nextSnapshotVersion = tokens[0] + '.' + (Integer.parseInt(tokens[1]) + 1) + '-SNAPSHOT'
-                    println "nextSnapshotVersion (calculated) = $nextSnapshotVersion"
-                    def param1 = new StringParameterValue('releaseVersion', releaseVersion)
-                    def param2 = new StringParameterValue('nextSnapshotVersion', nextSnapshotVersion)
-                    build.replaceAction(new ParametersAction(param1, param2))
-                }
-				'''.stripIndent()
+        systemGroovyCommand '''
+            import hudson.model.StringParameterValue
+            import hudson.model.ParametersAction
 
-        maven {
-            mavenInstallation 'Latest'
-            goals 'versions:set ' +
-                    '-DnewVersion=${releaseVersion} ' +
-                    '-DgenerateBackupPoms=false'
-            rootPOM "library1/pom.xml"
+        def env = build.getEnvironment(listener)
+            String releaseVersion = env.get('releaseVersion')
+            String nextSnapshotVersion = env.get('nextSnapshotVersion')
+
+            if (!releaseVersion) {
+            String pomPath = build.workspace.toString() + '/library1/pom.xml'
+            def pom = new XmlSlurper().parse(new File(pomPath))
+            releaseVersion = pom.version.toString().replace('-SNAPSHOT', '')
+            println "releaseVersion (calculated) = $releaseVersion"
+            def param = new StringParameterValue('releaseVersion', releaseVersion)
+            build.replaceAction(new ParametersAction(param))
+            }
+
+            if (!nextSnapshotVersion) {
+            def tokens = releaseVersion.split('\\.')
+            nextSnapshotVersion =
+                    tokens[0] + '.' + (Integer.parseInt(tokens[1]) + 1) + '-SNAPSHOT'
+            println "nextSnapshotVersion (calculated) = $nextSnapshotVersion"
+            def param1 = new StringParameterValue('releaseVersion', releaseVersion)
+            def param2 = new StringParameterValue('nextSnapshotVersion',
+                    nextSnapshotVersion)
+            build.replaceAction(new ParametersAction(param1, param2))
+            }
+            '''.stripIndent()
         }
-
-        maven {
-            mavenInstallation 'Latest'
-            goals 'versions:use-releases ' +
-                    '-DgenerateBackupPoms=false ' +
-                    '-DprocessDependencyManagement=true'
-            rootPOM "library1/pom.xml"
-        }
-
-        shell '''\
-              if find library1/ -name 'pom.xml' | xargs grep -n "SNAPSHOT"; then
-                echo 'SNAPSHOT versions not allowed in a release\'
-                exit 1
-              fi
-              '''.stripIndent()
-    }
 
     rootPOM 'library1/pom.xml'
     goals 'clean install'
 
-    postBuildSteps('SUCCESS') {
-        maven {
-            mavenInstallation 'Latest'
-            goals 'scm:checkin ' +
-                    '-Dmessage="Release version ${project.artifactId}:${releaseVersion}" ' +
-                    '-DdeveloperConnectionUrl=scm:git:git@gitlab.com:SvenWoltmann/jenkins-tutorial-demo.git'
-            rootPOM "library1/pom.xml"
-        }
+    postBuildSteps {
+    maven {
+        mavenInstallation 'Latest'
+        goals 'scm:checkin ' +
+            '-Dmessage="Release version ' +
+                    '${project.artifactId}:${releaseVersion}" ' +
+            '-DdeveloperConnectionUrl=scm:git:' +
+                    'git@gitlab.com:SvenWoltmann/jenkins-tutorial-demo.git'
+        rootPOM "library1/pom.xml"
+    }
 
-        maven {
-            mavenInstallation 'Latest'
-            goals 'scm:tag ' +
-                    '-Dtag=${project.artifactId}-${releaseVersion} ' +
-                    '-DdeveloperConnectionUrl=scm:git:git@gitlab.com:SvenWoltmann/jenkins-tutorial-demo.git'
-            rootPOM "library1/pom.xml"
-        }
+    maven {
+        mavenInstallation 'Latest'
+        goals 'scm:tag ' +
+            '-Dtag=${project.artifactId}-${releaseVersion} ' +
+            '-DdeveloperConnectionUrl=scm:git:' +
+                    'git@gitlab.com:SvenWoltmann/jenkins-tutorial-demo.git'
+        rootPOM "library1/pom.xml"
+    }
 
-        maven {
-            mavenInstallation 'Latest'
-            goals 'versions:set ' +
-                    '-DnewVersion=${nextSnapshotVersion} ' +
-                    '-DgenerateBackupPoms=false'
-            rootPOM "library1/pom.xml"
-        }
+    maven {
+        mavenInstallation 'Latest'
+        goals 'versions:set ' +
+            '-DnewVersion=${nextSnapshotVersion} ' +
+            '-DgenerateBackupPoms=false'
+        rootPOM "library1/pom.xml"
+    }
 
-        maven {
-            mavenInstallation 'Latest'
-            goals 'scm:checkin ' +
-                    '-Dmessage="Switch to next snapshot version: ${project.artifactId}:${nextSnapshotVersion}" ' +
-                    '-DdeveloperConnectionUrl=scm:git:git@gitlab.com:SvenWoltmann/jenkins-tutorial-demo.git'
-            rootPOM "library1/pom.xml"
-        }
+    maven {
+        mavenInstallation 'Latest'
+        goals 'scm:checkin ' +
+            '-Dmessage="Switch to next snapshot version: ' +
+                    '${project.artifactId}:${nextSnapshotVersion}" ' +
+            '-DdeveloperConnectionUrl=scm:git:' +
+                    'git@gitlab.com:SvenWoltmann/jenkins-tutorial-demo.git'
+        rootPOM "library1/pom.xml"
     }
 }
