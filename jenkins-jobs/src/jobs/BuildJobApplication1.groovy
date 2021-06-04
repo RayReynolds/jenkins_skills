@@ -105,7 +105,7 @@ mavenJob('Jenkins Tutorial Demo - Application 1 - Release (DSL)') {
             mavenInstallation 'Latest'
             goals 'scm:checkin ' +
                     '-Dmessage="Release version ${project.artifactId}:${releaseVersion}" ' +
-                    '-DdeveloperConnectionUrl=scm:git:git@gitlab.com:SvenWoltmann/jenkins-tutorial-demo.git'
+                    '-DdeveloperConnectionUrl=scm:git:git@gitlab.com:RayReynolds/jenkins-tutorial-demo.git'
             rootPOM "application1/pom.xml"
         }
 
@@ -113,7 +113,7 @@ mavenJob('Jenkins Tutorial Demo - Application 1 - Release (DSL)') {
             mavenInstallation 'Latest'
             goals 'scm:tag ' +
                     '-Dtag=${project.artifactId}-${releaseVersion} ' +
-                    '-DdeveloperConnectionUrl=scm:git:git@gitlab.com:SvenWoltmann/jenkins-tutorial-demo.git'
+                    '-DdeveloperConnectionUrl=scm:git:git@gitlab.com:RayReynolds/jenkins-tutorial-demo.git'
             rootPOM "application1/pom.xml"
         }
 
@@ -129,7 +129,7 @@ mavenJob('Jenkins Tutorial Demo - Application 1 - Release (DSL)') {
             mavenInstallation 'Latest'
             goals 'scm:checkin ' +
                     '-Dmessage="Switch to next snapshot version: ${project.artifactId}:${nextSnapshotVersion}" ' +
-                    '-DdeveloperConnectionUrl=scm:git:git@gitlab.com:SvenWoltmann/jenkins-tutorial-demo.git'
+                    '-DdeveloperConnectionUrl=scm:git:git@gitlab.com:RayReynolds/jenkins-tutorial-demo.git'
             rootPOM "application1/pom.xml"
         }
     }
