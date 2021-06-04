@@ -1,5 +1,5 @@
 mavenJob('Jenkins Tutorial Demo - Library 1 (DSL)') {
-    description('Build job for Jenkins tutorial / Library 1')
+    description 'Build job for Jenkins Tutorial / Library 1'
 
     logRotator {
         numToKeep 5
@@ -21,16 +21,17 @@ mavenJob('Jenkins Tutorial Demo - Library 1 (DSL)') {
 
             branch '$Branch'
 
-            // add extensions 'SparseCheckoutPaths' and 'PathRestriction'
+            // Add extensions 'SparseCheckoutPaths' and 'PathRestriction'
             def nodeBuilder = NodeBuilder.newInstance()
-            def sparseCheckout = nodeBuilder.createNode('hudson.plugins.git.extensions.impl.SparseCheckoutPaths')
+            def sparseCheckout = nodeBuilder.createNode(
+                    'hudson.plugins.git.extensions.impl.SparseCheckoutPaths')
             sparseCheckout
                     .appendNode('sparseCheckoutPaths')
                     .appendNode('hudson.plugins.git.extensions.impl.SparseCheckoutPath')
                     .appendNode('path', 'library1/')
             def pathRestrictions = nodeBuilder.createNode(
-                'hudson.plugins.git.extensions.impl.PathRestriction')
-            pathRestrictions.appendNode('includeRegions', 'library1/.*')
+                    'hudson.plugins.git.extensions.impl.PathRestriction')
+            pathRestrictions.appendNode('includedRegions', 'library1/.*')
             extensions {
                 extensions << sparseCheckout
                 extensions << pathRestrictions
@@ -45,6 +46,4 @@ mavenJob('Jenkins Tutorial Demo - Library 1 (DSL)') {
 
     rootPOM 'library1/pom.xml'
     goals 'clean install'
-
 }
-
