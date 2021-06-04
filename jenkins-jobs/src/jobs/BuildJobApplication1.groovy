@@ -31,9 +31,9 @@ mavenJob('Jenkins Tutorial Demo - Application 1 - Release (DSL)') {
             def sparseCheckout = nodeBuilder.createNode('hudson.plugins.git.extensions.impl.SparseCheckoutPaths')
             sparseCheckout.appendNode('sparseCheckoutPaths')
                     .appendNode('hudson.plugins.git.extensions.impl.SparseCheckoutPath')
-                    .appendNode('path', 'application1/')
+                    .appendNode('path', 'library1/')
             def pathRestrictions = nodeBuilder.createNode('hudson.plugins.git.extensions.impl.PathRestriction')
-            pathRestrictions.appendNode('includedRegions', 'application1/.*')
+            pathRestrictions.appendNode('includedRegions', 'library1/.*')
             extensions {
                 extensions << sparseCheckout
                 extensions << pathRestrictions
@@ -55,7 +55,7 @@ mavenJob('Jenkins Tutorial Demo - Application 1 - Release (DSL)') {
                 String nextSnapshotVersion = env.get('nextSnapshotVersion')
                 
                 if (!releaseVersion) {
-                    String pomPath = build.workspace.toString() + '/application1/pom.xml'
+                    String pomPath = build.workspace.toString() + '/library1/pom.xml'
                     def pom = new XmlSlurper().parse(new File(pomPath))
                     releaseVersion = pom.version.toString().replace('-SNAPSHOT', '')
                     println "releaseVersion (calculated) = $releaseVersion"
@@ -78,7 +78,7 @@ mavenJob('Jenkins Tutorial Demo - Application 1 - Release (DSL)') {
             goals 'versions:set ' +
                     '-DnewVersion=${releaseVersion} ' +
                     '-DgenerateBackupPoms=false'
-            rootPOM "application1/pom.xml"
+            rootPOM "library1/pom.xml"
         }
 
         maven {
@@ -86,18 +86,18 @@ mavenJob('Jenkins Tutorial Demo - Application 1 - Release (DSL)') {
             goals 'versions:use-releases ' +
                     '-DgenerateBackupPoms=false ' +
                     '-DprocessDependencyManagement=true'
-            rootPOM "application1/pom.xml"
+            rootPOM "library1/pom.xml"
         }
 
         shell '''\
-              if find application1/ -name 'pom.xml' | xargs grep -n "SNAPSHOT"; then
+              if find library1/ -name 'pom.xml' | xargs grep -n "SNAPSHOT"; then
                 echo 'SNAPSHOT versions not allowed in a release\'
                 exit 1
               fi
               '''.stripIndent()
     }
 
-    rootPOM 'application1/pom.xml'
+    rootPOM 'library1/pom.xml'
     goals 'clean install'
 
     postBuildSteps('SUCCESS') {
@@ -106,7 +106,7 @@ mavenJob('Jenkins Tutorial Demo - Application 1 - Release (DSL)') {
             goals 'scm:checkin ' +
                     '-Dmessage="Release version ${project.artifactId}:${releaseVersion}" ' +
                     '-DdeveloperConnectionUrl=scm:git:git@gitlab.com:SvenWoltmann/jenkins-tutorial-demo.git'
-            rootPOM "application1/pom.xml"
+            rootPOM "library1/pom.xml"
         }
 
         maven {
@@ -114,7 +114,7 @@ mavenJob('Jenkins Tutorial Demo - Application 1 - Release (DSL)') {
             goals 'scm:tag ' +
                     '-Dtag=${project.artifactId}-${releaseVersion} ' +
                     '-DdeveloperConnectionUrl=scm:git:git@gitlab.com:SvenWoltmann/jenkins-tutorial-demo.git'
-            rootPOM "application1/pom.xml"
+            rootPOM "library1/pom.xml"
         }
 
         maven {
@@ -122,7 +122,7 @@ mavenJob('Jenkins Tutorial Demo - Application 1 - Release (DSL)') {
             goals 'versions:set ' +
                     '-DnewVersion=${nextSnapshotVersion} ' +
                     '-DgenerateBackupPoms=false'
-            rootPOM "application1/pom.xml"
+            rootPOM "library1/pom.xml"
         }
 
         maven {
@@ -130,7 +130,7 @@ mavenJob('Jenkins Tutorial Demo - Application 1 - Release (DSL)') {
             goals 'scm:checkin ' +
                     '-Dmessage="Switch to next snapshot version: ${project.artifactId}:${nextSnapshotVersion}" ' +
                     '-DdeveloperConnectionUrl=scm:git:git@gitlab.com:SvenWoltmann/jenkins-tutorial-demo.git'
-            rootPOM "application1/pom.xml"
+            rootPOM "library1/pom.xml"
         }
     }
 }
