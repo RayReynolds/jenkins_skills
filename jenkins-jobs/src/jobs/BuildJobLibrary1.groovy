@@ -6,11 +6,12 @@ mavenJob('Jenkins Tutorial Demo - Library 1 (DSL)') {
     }
 
     parameters {
-        gitParam('Branch') {
-            description 'The Git branch to checkout'
-            type 'BRANCH'
-            defaultValue 'origin/master'
-        }
+        stringParam('Branch', 'origin/master')
+        //gitParam('Branch') {
+        //    description 'The Git branch to checkout'
+        //    type 'BRANCH'
+        //    defaultValue 'origin/master'
+        //}
     }
 
     scm {
